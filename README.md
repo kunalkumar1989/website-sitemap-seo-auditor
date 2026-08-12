@@ -34,5 +34,5 @@ This tool can help you:
 Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/website-sitemap-auditor.git
+git clone https://github.com/kunalkumar1989/website-sitemap-auditor.git
 cd website-sitemap-auditor
