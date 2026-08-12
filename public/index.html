@@ -1,0 +1,1995 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Website Sitemap Auditor</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, Arial, Helvetica, sans-serif;
+            background: #f5f7fb;
+            color: #172033;
+        }
+
+        /* =========================
+           HEADER
+        ========================== */
+
+        header {
+            background: #111827;
+            color: #fff;
+            padding: 28px 6%;
+        }
+
+        header h1 {
+            margin: 0 0 6px;
+            font-size: 30px;
+        }
+
+        header p {
+            margin: 0;
+            color: #cbd5e1;
+        }
+
+        /* =========================
+           MAIN
+        ========================== */
+
+        main {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+        }
+
+        /* =========================
+           FORM
+        ========================== */
+
+        .form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form input {
+            flex: 1;
+            min-width: 0;
+            padding: 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .form input:focus {
+            border-color: #2563eb;
+        }
+
+        .form button {
+            padding: 14px 25px;
+            border: 0;
+            border-radius: 9px;
+            background: #2563eb;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .form button:hover {
+            background: #1d4ed8;
+        }
+
+        .form button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* =========================
+           ERROR
+        ========================== */
+
+        .error {
+            display: none;
+            margin-top: 15px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        /* =========================
+           PROGRESS CARD
+        ========================== */
+
+        #progressBox {
+            display: none;
+            margin-top: 25px;
+            padding: 30px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+            text-align: center;
+        }
+
+        .audit-status {
+            font-size: 20px;
+            font-weight: 700;
+            color: #172033;
+        }
+
+        /* =========================
+           MAIN AUDIT PROGRESS CIRCLE
+        ========================== */
+
+        .progress-circle {
+            width: 180px;
+            height: 180px;
+            margin: 25px auto;
+            border-radius: 50%;
+
+            background: conic-gradient(
+                #2563eb 0deg,
+                #2563eb 0deg,
+                #e5e7eb 0deg,
+                #e5e7eb 360deg
+            );
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+
+        .progress-circle::before {
+            content: "";
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .progress-circle-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .progress-percent {
+            font-size: 34px;
+            font-weight: 800;
+            color: #172033;
+        }
+
+        .progress-pages {
+            margin-top: 4px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .audit-current-url {
+            max-width: 900px;
+            margin: 0 auto 20px;
+            color: #64748b;
+            word-break: break-all;
+        }
+
+        .audit-current-url strong {
+            color: #334155;
+        }
+
+        /* =========================
+           PROGRESS INFO
+        ========================== */
+
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .progress-item {
+            padding: 14px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .progress-item small {
+            display: block;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+
+        .progress-item strong {
+            display: block;
+            word-break: break-all;
+        }
+
+        /* =========================
+           SITEMAP
+        ========================== */
+
+        .sitemap-box {
+            display: none;
+            margin-top: 20px;
+            padding: 18px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .sitemap-box h3 {
+            margin-top: 0;
+        }
+
+        .sitemap-url {
+            display: block;
+            padding: 7px 0;
+            color: #2563eb;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .sitemap-url:hover {
+            text-decoration: underline;
+        }
+
+        /* =========================
+           RESULTS
+        ========================== */
+
+        #results {
+            display: none;
+            margin-top: 25px;
+        }
+
+        /* =========================
+           SUMMARY CARDS
+        ========================== */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .stat {
+            position: relative;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 22px 18px;
+            min-height: 250px;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+            cursor: pointer;
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease,
+                border 0.2s ease,
+                background 0.2s ease;
+        }
+
+        .stat:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.09);
+        }
+
+        .stat.active {
+            border: 2px solid #2563eb;
+            background: #eff6ff;
+        }
+
+        .stat.active::after {
+            content: "";
+            position: absolute;
+            left: 20%;
+            right: 20%;
+            bottom: 0;
+            height: 3px;
+            background: #2563eb;
+            border-radius: 5px 5px 0 0;
+        }
+
+        /* =========================
+           STAT CIRCLE
+        ========================== */
+
+        .stat-circle {
+            width: 125px;
+            height: 125px;
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            position: relative;
+            margin-bottom: 15px;
+
+            background: conic-gradient(
+                var(--circle-color) 0deg,
+                var(--circle-color) 360deg
+            );
+        }
+
+        .stat-circle::before {
+            content: "";
+            position: absolute;
+            width: 101px;
+            height: 101px;
+            border-radius: 50%;
+            background: #fff;
+        }
+
+        .stat-circle-value {
+            position: relative;
+            z-index: 2;
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--circle-color);
+        }
+
+        .stat-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .stat small {
+            display: block;
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        /* =========================
+           CIRCLE COLORS
+        ========================== */
+
+        .stat-all {
+            --circle-color: #2563eb;
+        }
+
+        .stat-critical {
+            --circle-color: #dc2626;
+        }
+
+        .stat-warning {
+            --circle-color: #d97706;
+        }
+
+        .stat-passed {
+            --circle-color: #16a34a;
+        }
+
+        /* =========================
+           TOOLBAR
+        ========================== */
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin: 20px 0 10px;
+        }
+
+        .toolbar h2 {
+            margin: 0;
+        }
+
+        .toolbar input {
+            width: 300px;
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .toolbar input:focus {
+            border-color: #2563eb;
+        }
+
+        /* =========================
+           TABLE
+        ========================== */
+
+        .table-card {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1000px;
+            border-collapse: collapse;
+            background: #fff;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #eef0f4;
+            text-align: left;
+            vertical-align: top;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 700;
+        }
+
+        .url {
+            max-width: 400px;
+            word-break: break-all;
+        }
+
+        /* =========================
+           ISSUES ACCORDION
+        ========================== */
+
+        .issue-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 7px 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .issue-header:hover {
+            opacity: 0.75;
+        }
+
+        .issue-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .issue-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            min-width: 28px;
+            height: 28px;
+            padding: 0 8px;
+
+            border-radius: 20px;
+            background: #fee2e2;
+            color: #991b1b;
+            font-weight: 700;
+        }
+
+        .issue-arrow {
+            font-size: 14px;
+            transition: transform 0.2s ease;
+        }
+
+        .issue-arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .issue-details {
+            display: none;
+            margin-top: 8px;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .issue-details.open {
+            display: block;
+        }
+
+        .issue-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .issue-item:last-child {
+            border-bottom: 0;
+        }
+
+        .issue-type {
+            display: block;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .issue-message {
+            display: block;
+            margin-top: 4px;
+            color: #475569;
+        }
+
+        .issue-critical {
+            color: #dc2626;
+        }
+
+        .issue-warning {
+            color: #d97706;
+        }
+
+        .ok {
+            color: #15803d;
+            font-weight: 700;
+        }
+
+        /* =========================
+           EMPTY
+        ========================== */
+
+        .empty {
+            text-align: center;
+            padding: 40px !important;
+            color: #64748b;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 1100px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .progress-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .form {
+                flex-direction: column;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar input {
+                width: 100%;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .stat {
+                min-height: 225px;
+            }
+
+            .progress-circle {
+                width: 150px;
+                height: 150px;
+            }
+
+            .progress-circle::before {
+                width: 115px;
+                height: 115px;
+            }
+
+            .stat-circle {
+                width: 115px;
+                height: 115px;
+            }
+
+            .stat-circle::before {
+                width: 93px;
+                height: 93px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+
+    <header>
+        <h1>Website Sitemap Auditor</h1>
+
+        <p>
+            Analyze sitemap pages and find SEO
+            and technical issues automatically.
+        </p>
+    </header>
+
+    <main>
+
+        <!-- =========================
+             AUDIT FORM
+        ========================== -->
+
+        <div class="card">
+
+            <div class="form">
+
+                <input
+                    id="url"
+                    type="text"
+                    placeholder="https://example.com"
+                >
+
+                <button id="run">
+                    Start Audit
+                </button>
+
+            </div>
+
+            <div id="error" class="error"></div>
+
+            <!-- =========================
+                 CIRCULAR PROGRESS
+            ========================== -->
+
+            <div id="progressBox">
+
+                <div id="status" class="audit-status">
+                    Starting audit...
+                </div>
+
+                <div id="progressCircle" class="progress-circle">
+
+                    <div class="progress-circle-content">
+
+                        <div
+                            id="progressPercent"
+                            class="progress-percent"
+                        >
+                            0%
+                        </div>
+
+                        <div class="progress-pages">
+
+                            <span id="scanned">0</span>
+                            /
+                            <span id="total">0</span>
+
+                            pages
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="audit-current-url">
+
+                    Current URL:
+
+                    <strong id="currentUrl">-</strong>
+
+                </div>
+
+                <div class="progress-grid">
+
+                    <div class="progress-item">
+
+                        <small>
+                            Issues Found
+                        </small>
+
+                        <strong id="issueCount">
+                            0
+                        </strong>
+
+                    </div>
+
+                    <div class="progress-item">
+
+                        <small>
+                            Sitemap URLs
+                        </small>
+
+                        <strong id="sitemapCount">
+                            0
+                        </strong>
+
+                    </div>
+
+                    <div class="progress-item">
+
+                        <small>
+                            Status
+                        </small>
+
+                        <strong id="auditStatusText">
+                            Running
+                        </strong>
+
+                    </div>
+
+                </div>
+
+                <!-- =========================
+                     SITEMAPS
+                ========================== -->
+
+                <div id="sitemapBox" class="sitemap-box">
+
+                    <h3>
+                        Sitemaps Found
+                    </h3>
+
+                    <div id="sitemapList"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- =========================
+             RESULTS
+        ========================== -->
+
+        <div id="results">
+
+            <!-- =========================
+                 SUMMARY CARDS
+            ========================== -->
+
+            <div class="stats">
+
+                <!-- ALL PAGES -->
+
+                <div
+                    id="card-all"
+                    class="stat stat-all active"
+                    onclick="filterResults('all')"
+                >
+
+                    <div class="stat-circle">
+
+                        <div
+                            id="pages"
+                            class="stat-circle-value"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+                    <span class="stat-title">
+                        Pages Audited
+                    </span>
+
+                    <small>
+                        Click to show all pages
+                    </small>
+
+                </div>
+
+                <!-- CRITICAL -->
+
+                <div
+                    id="card-critical"
+                    class="stat stat-critical"
+                    onclick="filterResults('critical')"
+                >
+
+                    <div class="stat-circle">
+
+                        <div
+                            id="critical"
+                            class="stat-circle-value"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+                    <span class="stat-title">
+                        Critical Issues
+                    </span>
+
+                    <small>
+                        Click to show affected pages
+                    </small>
+
+                </div>
+
+                <!-- WARNING -->
+
+                <div
+                    id="card-warning"
+                    class="stat stat-warning"
+                    onclick="filterResults('warning')"
+                >
+
+                    <div class="stat-circle">
+
+                        <div
+                            id="warnings"
+                            class="stat-circle-value"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+                    <span class="stat-title">
+                        Warnings
+                    </span>
+
+                    <small>
+                        Click to show affected pages
+                    </small>
+
+                </div>
+
+                <!-- PASSED -->
+
+                <div
+                    id="card-passed"
+                    class="stat stat-passed"
+                    onclick="filterResults('passed')"
+                >
+
+                    <div class="stat-circle">
+
+                        <div
+                            id="passed"
+                            class="stat-circle-value"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+                    <span class="stat-title">
+                        Passed Pages
+                    </span>
+
+                    <small>
+                        Click to show passed pages
+                    </small>
+
+                </div>
+
+            </div>
+
+            <!-- =========================
+                 TOOLBAR
+            ========================== -->
+
+            <div class="toolbar">
+
+                <h2 id="tableTitle">
+                    All Pages
+                </h2>
+
+                <input
+                    id="filter"
+                    type="text"
+                    placeholder="Search URL or issue..."
+                >
+
+            </div>
+
+            <!-- =========================
+                 RESULTS TABLE
+            ========================== -->
+
+            <div class="card table-card">
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    URL
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Issues
+                                </th>
+
+                                <th>
+                                    SEO Data
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="tbody"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+        let data = [];
+
+        let polling = null;
+
+        let currentFilter = "all";
+
+
+        /* =========================
+           HELPER
+        ========================== */
+
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+
+        /* =========================
+           ESCAPE HTML
+        ========================== */
+
+        function escapeHtml(value) {
+
+            return String(value ?? "")
+                .replace(
+                    /[&<>"']/g,
+                    character => ({
+                        "&": "&amp;",
+                        "<": "&lt;",
+                        ">": "&gt;",
+                        '"': "&quot;",
+                        "'": "&#39;"
+                    }[character])
+                );
+
+        }
+
+
+        /* =========================
+           CARD FILTER
+        ========================== */
+
+        function filterResults(type) {
+
+            currentFilter = type;
+
+            document
+                .querySelectorAll(".stat")
+                .forEach(card => {
+
+                    card.classList.remove("active");
+
+                });
+
+            const selectedCard =
+                document.getElementById(
+                    `card-${type}`
+                );
+
+            if (selectedCard) {
+
+                selectedCard.classList.add("active");
+
+            }
+
+            const titles = {
+
+                all:
+                    "All Pages",
+
+                critical:
+                    "Pages with Critical Issues",
+
+                warning:
+                    "Pages with Warnings",
+
+                passed:
+                    "Passed Pages"
+
+            };
+
+            $("tableTitle").textContent =
+                titles[type] || "All Pages";
+
+            render();
+
+            const table =
+                document.querySelector(
+                    ".table-card"
+                );
+
+            if (table) {
+
+                table.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+            }
+
+        }
+
+
+        /* =========================
+           RENDER
+        ========================== */
+
+        function render() {
+
+            const query =
+                $("filter")
+                    .value
+                    .trim()
+                    .toLowerCase();
+
+            let filteredData =
+                data.filter(page => {
+
+                    const issues =
+                        page.issues || [];
+
+                    if (
+                        currentFilter ===
+                        "critical"
+                    ) {
+
+                        return issues.some(
+                            issue =>
+                                issue.severity ===
+                                "critical"
+                        );
+
+                    }
+
+                    if (
+                        currentFilter ===
+                        "warning"
+                    ) {
+
+                        return issues.some(
+                            issue =>
+                                issue.severity ===
+                                "warning"
+                        );
+
+                    }
+
+                    if (
+                        currentFilter ===
+                        "passed"
+                    ) {
+
+                        return (
+                            issues.length === 0
+                        );
+
+                    }
+
+                    return true;
+
+                });
+
+
+            filteredData =
+                filteredData.filter(
+                    page => {
+
+                        const issues =
+                            page.issues || [];
+
+                        const text =
+                            [
+                                page.url,
+                                page.title,
+
+                                ...issues.map(
+                                    issue =>
+                                        issue.type
+                                ),
+
+                                ...issues.map(
+                                    issue =>
+                                        issue.message
+                                )
+
+                            ]
+                                .join(" ")
+                                .toLowerCase();
+
+                        return text.includes(
+                            query
+                        );
+
+                    }
+                );
+
+
+            if (
+                filteredData.length === 0
+            ) {
+
+                $("tbody").innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="4"
+                            class="empty"
+                        >
+
+                            No pages found
+                            for this filter.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+
+            }
+
+
+            $("tbody").innerHTML =
+
+                filteredData
+                    .map(
+                        (page, index) => {
+
+                            const issues =
+                                page.issues ||
+                                [];
+
+                            let issuesHtml;
+
+
+                            if (
+                                issues.length
+                            ) {
+
+                                issuesHtml = `
+
+                                    <div
+                                        class="issue-header"
+                                        onclick="toggleIssues(${index})"
+                                    >
+
+                                        <div
+                                            class="issue-header-left"
+                                        >
+
+                                            <strong>
+                                                Issues Found
+                                            </strong>
+
+                                            <span
+                                                class="issue-count"
+                                            >
+                                                ${issues.length}
+                                            </span>
+
+                                        </div>
+
+                                        <span
+                                            id="arrow-${index}"
+                                            class="issue-arrow"
+                                        >
+                                            ▼
+                                        </span>
+
+                                    </div>
+
+                                    <div
+                                        id="issues-${index}"
+                                        class="issue-details"
+                                    >
+
+                                        ${issues
+                                            .map(
+                                                issue => {
+
+                                                    const severity =
+                                                        issue.severity ||
+                                                        "warning";
+
+                                                    return `
+
+                                                        <div
+                                                            class="issue-item"
+                                                        >
+
+                                                            <span
+                                                                class="
+                                                                    issue-type
+                                                                    ${
+                                                                        severity ===
+                                                                        "critical"
+                                                                            ? "issue-critical"
+                                                                            : "issue-warning"
+                                                                    }
+                                                                "
+                                                            >
+
+                                                                ${escapeHtml(
+                                                                    issue.type ||
+                                                                    "Issue"
+                                                                )}
+
+                                                            </span>
+
+                                                            <span
+                                                                class="issue-message"
+                                                            >
+
+                                                                ${escapeHtml(
+                                                                    issue.message ||
+                                                                    ""
+                                                                )}
+
+                                                            </span>
+
+                                                        </div>
+
+                                                    `;
+
+                                                }
+                                            )
+                                            .join("")}
+
+                                    </div>
+
+                                `;
+
+                            } else {
+
+                                issuesHtml = `
+
+                                    <span class="ok">
+                                        ✓ No issues
+                                    </span>
+
+                                `;
+
+                            }
+
+
+                            return `
+
+                                <tr>
+
+                                    <td class="url">
+
+                                        ${escapeHtml(
+                                            page.url
+                                        )}
+
+                                    </td>
+
+                                    <td>
+
+                                        ${escapeHtml(
+                                            page.status ??
+                                            "-"
+                                        )}
+
+                                    </td>
+
+                                    <td>
+
+                                        ${issuesHtml}
+
+                                    </td>
+
+                                    <td>
+
+                                        <strong>
+                                            Title:
+                                        </strong>
+
+                                        ${escapeHtml(
+                                            page.title ||
+                                            "—"
+                                        )}
+
+                                        <br><br>
+
+                                        <strong>
+                                            H1:
+                                        </strong>
+
+                                        ${escapeHtml(
+                                            page.h1Count ??
+                                            "-"
+                                        )}
+
+                                        <br>
+
+                                        <strong>
+                                            Images:
+                                        </strong>
+
+                                        ${escapeHtml(
+                                            page.images ??
+                                            "-"
+                                        )}
+
+                                        <br>
+
+                                        <strong>
+                                            Missing ALT:
+                                        </strong>
+
+                                        ${escapeHtml(
+                                            page.imagesMissingAlt ??
+                                            "-"
+                                        )}
+
+                                        <br>
+
+                                        <strong>
+                                            Canonical:
+                                        </strong>
+
+                                        ${escapeHtml(
+                                            page.canonical ||
+                                            "—"
+                                        )}
+
+                                    </td>
+
+                                </tr>
+
+                            `;
+
+                        }
+                    )
+                    .join("");
+
+        }
+
+
+        /* =========================
+           ISSUE ACCORDION
+        ========================== */
+
+        function toggleIssues(index) {
+
+            const details =
+                document.getElementById(
+                    `issues-${index}`
+                );
+
+            const arrow =
+                document.getElementById(
+                    `arrow-${index}`
+                );
+
+            if (!details) {
+                return;
+            }
+
+            const isOpen =
+                details.classList.contains("open");
+
+            if (isOpen) {
+
+                details.classList.remove("open");
+
+                if (arrow) {
+                    arrow.classList.remove("open");
+                }
+
+            } else {
+
+                details.classList.add("open");
+
+                if (arrow) {
+                    arrow.classList.add("open");
+                }
+
+            }
+
+        }
+
+
+        /* =========================
+           UPDATE PROGRESS
+        ========================== */
+
+        function updateProgress(job) {
+
+            const progress =
+                Math.max(
+                    0,
+                    Math.min(
+                        100,
+                        Number(job.progress || 0)
+                    )
+                );
+
+
+            /* =========================
+               CIRCLE PROGRESS
+            ========================== */
+
+            const degrees =
+                progress * 3.6;
+
+            $("progressCircle")
+                .style
+                .background = `conic-gradient(
+                    #2563eb ${degrees}deg,
+                    #e5e7eb ${degrees}deg
+                )`;
+
+            $("progressPercent")
+                .textContent =
+                `${progress}%`;
+
+            $("status")
+                .textContent =
+                job.status ||
+                "Working...";
+
+            $("auditStatusText")
+                .textContent =
+                job.completed
+                    ? "Completed"
+                    : "Running";
+
+            $("scanned")
+                .textContent =
+                job.scanned ||
+                0;
+
+            $("total")
+                .textContent =
+                job.total ||
+                0;
+
+            $("currentUrl")
+                .textContent =
+                job.currentUrl ||
+                "-";
+
+            $("issueCount")
+                .textContent =
+                job.issuesFound ||
+                0;
+
+            $("sitemapCount")
+                .textContent =
+                job.sitemapUrls ||
+                0;
+
+
+            /* =========================
+               SITEMAPS
+            ========================== */
+
+            if (
+                job.sitemaps &&
+                job.sitemaps.length
+            ) {
+
+                $("sitemapBox")
+                    .style
+                    .display =
+                    "block";
+
+                $("sitemapList")
+                    .innerHTML =
+
+                    job.sitemaps
+                        .map(
+                            sitemap => `
+
+                                <a
+                                    class="sitemap-url"
+                                    href="${escapeHtml(
+                                        sitemap
+                                    )}"
+                                    target="_blank"
+                                    rel="noopener"
+                                >
+
+                                    ✓
+                                    ${escapeHtml(
+                                        sitemap
+                                    )}
+
+                                </a>
+
+                            `
+                        )
+                        .join("");
+
+            }
+
+
+            /* =========================
+               COMPLETE
+            ========================== */
+
+            if (job.completed) {
+
+                clearInterval(
+                    polling
+                );
+
+                polling = null;
+
+                $("run")
+                    .disabled =
+                    false;
+
+                data =
+                    job.pages || [];
+
+                let criticalCount =
+                    0;
+
+                let warningCount =
+                    0;
+
+
+                data.forEach(page => {
+
+                    const issues =
+                        page.issues || [];
+
+                    issues.forEach(
+                        issue => {
+
+                            if (
+                                issue.severity ===
+                                "critical"
+                            ) {
+
+                                criticalCount++;
+
+                            } else {
+
+                                warningCount++;
+
+                            }
+
+                        }
+                    );
+
+                });
+
+
+                const passedCount =
+                    data.filter(
+                        page => {
+
+                            const issues =
+                                page.issues || [];
+
+                            return (
+                                issues.length ===
+                                0
+                            );
+
+                        }
+                    ).length;
+
+
+                /* =========================
+                   UPDATE SUMMARY
+                ========================== */
+
+                $("pages")
+                    .textContent =
+                    data.length;
+
+                $("critical")
+                    .textContent =
+                    criticalCount;
+
+                $("warnings")
+                    .textContent =
+                    warningCount;
+
+                $("passed")
+                    .textContent =
+                    passedCount;
+
+                $("results")
+                    .style
+                    .display =
+                    "block";
+
+
+                currentFilter =
+                    "all";
+
+
+                document
+                    .querySelectorAll(".stat")
+                    .forEach(
+                        card => {
+
+                            card.classList
+                                .remove("active");
+
+                        }
+                    );
+
+
+                $("card-all")
+                    .classList
+                    .add("active");
+
+
+                $("tableTitle")
+                    .textContent =
+                    "All Pages";
+
+
+                render();
+
+
+                if (job.error) {
+
+                    $("error")
+                        .textContent =
+                        job.error;
+
+                    $("error")
+                        .style
+                        .display =
+                        "block";
+
+                }
+
+            }
+
+        }
+
+
+        /* =========================
+           POLL JOB
+        ========================== */
+
+        async function pollJob(jobId) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `/api/audit/${jobId}`
+                    );
+
+                const job =
+                    await response.json();
+
+                updateProgress(job);
+
+            } catch (error) {
+
+                console.error(
+                    "Polling error:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =========================
+           START AUDIT
+        ========================== */
+
+        $("run").onclick =
+            async function () {
+
+                const url =
+                    $("url")
+                        .value
+                        .trim();
+
+
+                if (!url) {
+
+                    $("error")
+                        .textContent =
+                        "Please enter a website URL.";
+
+                    $("error")
+                        .style
+                        .display =
+                        "block";
+
+                    return;
+
+                }
+
+
+                let auditUrl =
+                    url;
+
+
+                if (
+                    !auditUrl.startsWith("http://") &&
+                    !auditUrl.startsWith("https://")
+                ) {
+
+                    auditUrl =
+                        "https://" +
+                        auditUrl;
+
+                }
+
+
+                $("run")
+                    .disabled =
+                    true;
+
+                $("error")
+                    .style
+                    .display =
+                    "none";
+
+                $("results")
+                    .style
+                    .display =
+                    "none";
+
+                $("progressBox")
+                    .style
+                    .display =
+                    "block";
+
+                $("sitemapBox")
+                    .style
+                    .display =
+                    "none";
+
+
+                $("progressCircle")
+                    .style
+                    .background = `
+                        conic-gradient(
+                            #2563eb 0deg,
+                            #e5e7eb 0deg
+                        )
+                    `;
+
+
+                $("progressPercent")
+                    .textContent =
+                    "0%";
+
+                $("scanned")
+                    .textContent =
+                    "0";
+
+                $("total")
+                    .textContent =
+                    "0";
+
+                $("issueCount")
+                    .textContent =
+                    "0";
+
+                $("sitemapCount")
+                    .textContent =
+                    "0";
+
+                $("currentUrl")
+                    .textContent =
+                    "-";
+
+                $("auditStatusText")
+                    .textContent =
+                    "Running";
+
+                $("status")
+                    .textContent =
+                    "Starting audit...";
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/audit",
+                            {
+
+                                method:
+                                    "POST",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "application/json"
+
+                                },
+
+                                body:
+                                    JSON.stringify({
+                                        url:
+                                            auditUrl
+                                    })
+
+                            }
+                        );
+
+
+                    const result =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            result.error ||
+                            "Audit failed"
+                        );
+
+                    }
+
+
+                    const jobId =
+                        result.jobId;
+
+
+                    if (!jobId) {
+
+                        throw new Error(
+                            "No job ID returned by audit API."
+                        );
+
+                    }
+
+
+                    if (polling) {
+
+                        clearInterval(
+                            polling
+                        );
+
+                    }
+
+
+                    polling =
+                        setInterval(
+                            function () {
+
+                                pollJob(
+                                    jobId
+                                );
+
+                            },
+                            500
+                        );
+
+
+                    pollJob(
+                        jobId
+                    );
+
+
+                } catch (error) {
+
+                    $("error")
+                        .textContent =
+                        error.message;
+
+                    $("error")
+                        .style
+                        .display =
+                        "block";
+
+                    $("run")
+                        .disabled =
+                        false;
+
+                }
+
+            };
+
+
+        /* =========================
+           SEARCH
+        ========================== */
+
+        $("filter")
+            .addEventListener(
+                "input",
+                function () {
+
+                    render();
+
+                }
+            );
+
+
+        /* =========================
+           ENTER KEY
+        ========================== */
+
+        $("url")
+            .addEventListener(
+                "keydown",
+                function (event) {
+
+                    if (
+                        event.key ===
+                        "Enter"
+                    ) {
+
+                        $("run")
+                            .click();
+
+                    }
+
+                }
+            );
+
+    </script>
+
+</body>
+
+</html>
